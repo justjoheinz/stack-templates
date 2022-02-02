@@ -9,7 +9,7 @@ copyright:           "{{copyright}}{{^copyright}}{{year}}{{^year}}2019{{/year}} 
 
 extra-source-files:
 - README.md
-- ChangeLog.md
+
 
 # Metadata used when publishing your package
 # synopsis:            Short description of your package
@@ -21,7 +21,11 @@ extra-source-files:
 description:         Please see the README on GitHub at <https://github.com/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}#readme>
 
 dependencies:
-- base >= 4.7 && < 5
+  - base >= 4.7 && < 5
+  - text
+
+default-extensions:
+  - OverloadedStrings
 
 library:
   source-dirs: src
@@ -47,14 +51,22 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - {{name}}
+    - doctest
 
 {-# START_FILE Setup.hs #-}
 import Distribution.Simple
 main = defaultMain
 
 {-# START_FILE test/Spec.hs #-}
+import           Test.DocTest
+
 main :: IO ()
-main = putStrLn "Test suite not yet implemented"
+main =
+  doctest
+    [ "--verbose",
+      "-isrc",
+      "src/Lib.hs"
+      ]
 
 {-# START_FILE src/Lib.hs #-}
 module Lib
@@ -74,11 +86,6 @@ main = someFunc
 
 {-# START_FILE README.md #-}
 # {{name}}
-
-{-# START_FILE ChangeLog.md #-}
-# Changelog for {{name}}
-
-## Unreleased changes
 
 {-# START_FILE LICENSE #-}
 Copyright {{author-name}}{{^author-name}}Author name here{{/author-name}} (c) {{year}}{{^year}}2019{{/year}}
@@ -115,3 +122,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 {-# START_FILE .gitignore #-}
 .stack-work/
 *~
+dist-newstyle/
+.DS_Store
+TAGS
