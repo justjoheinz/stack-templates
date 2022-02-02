@@ -25,7 +25,26 @@ dependencies:
   - text
 
 default-extensions:
+  - EmptyCase
+  - InstanceSigs
+  - MultiParamTypeClasses
   - OverloadedStrings
+  - LambdaCase
+  - MultiWayIf
+  - NamedFieldPuns
+  - TupleSections
+  - DeriveFoldable
+  - DeriveFunctor
+  - DeriveGeneric
+  - DeriveLift
+  - DeriveTraversable
+  - DerivingStrategies
+  - GeneralizedNewtypeDeriving
+  - StandaloneDeriving
+  - BangPatterns
+  - KindSignatures
+  - TypeOperators
+
 
 library:
   source-dirs: src
