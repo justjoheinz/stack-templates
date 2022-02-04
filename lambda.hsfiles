@@ -1,6 +1,6 @@
 {-# START_FILE package.yaml #-}
 name:                {{name}}
-version:             0.1.0.0
+version:             0.1.0
 github:              "{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}"
 license:             BSD3
 author:              "{{author-name}}{{^author-name}}Author name here{{/author-name}}"
@@ -9,6 +9,8 @@ copyright:           "{{copyright}}{{^copyright}}{{year}}{{^year}}2022{{/year}} 
 
 extra-source-files:
 - README.md
+- Dockerfile
+- Makefile
 
 
 # Metadata used when publishing your package
@@ -20,95 +22,148 @@ extra-source-files:
 # common to point users to the README.md file.
 description:         Please see the README on GitHub at <https://github.com/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}#readme>
 
+
 dependencies:
-  - base >= 4.7 && < 5
-  - text
-
-default-extensions:
-  - EmptyCase
-  - InstanceSigs
-  - MultiParamTypeClasses
-  - OverloadedStrings
-  - LambdaCase
-  - MultiWayIf
-  - NamedFieldPuns
-  - TupleSections
-  - DeriveFoldable
-  - DeriveFunctor
-  - DeriveGeneric
-  - DeriveLift
-  - DeriveTraversable
-  - DerivingStrategies
-  - GeneralizedNewtypeDeriving
-  - StandaloneDeriving
-  - BangPatterns
-  - KindSignatures
-  - TypeOperators
-  - ApplicativeDo
-
+- base >= 4.7 && < 5
+- aws-lambda-haskell-runtime >= 4.1.1
+- safe-exceptions-checked >= 0.1.0
+- aeson
 
 library:
   source-dirs: src
 
 executables:
-  {{name}}-exe:
+  bootstrap:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
     - -threaded
     - -rtsopts
+    - -O2
     - -with-rtsopts=-N
     dependencies:
     - {{name}}
 
-tests:
-  {{name}}-test:
-    main:                Spec.hs
-    source-dirs:         test
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    dependencies:
-    - {{name}}
-    - doctest
+default-extensions:
+  - RecordWildCards
+  - OverloadedLists
+  - OverloadedStrings
+  - DeriveGeneric
 
 {-# START_FILE Setup.hs #-}
 import Distribution.Simple
 main = defaultMain
 
-{-# START_FILE test/Spec.hs #-}
-import           Test.DocTest
-
-main :: IO ()
-main =
-  doctest
-    [ "--verbose",
-      "-isrc",
-      "src/Lib.hs"
-      ]
+{-# START_FILE Makefile #-}
+all:
+	# You can then tag the image and upload it to a registry of your choice
+	@docker build . -t my-haskell-lambda-image
 
 {-# START_FILE src/Lib.hs #-}
-module Lib
-    ( someFunc
-    ) where
+module Lib where
 
-someFunc :: IO ()
-someFunc = putStrLn "someFunc"
+import GHC.Generics
+import Data.Aeson
+import Aws.Lambda
+
+data Person = Person
+  { personName :: String
+  , personAge :: Int
+  } deriving (Generic)
+
+instance FromJSON Person
+instance ToJSON Person
+
+handler :: Person -> Context () -> IO (Either String Person)
+handler person context =
+  if personAge person > 0 then
+    return (Right person)
+  else
+    return (Left "A person's age must be positive")
+
+{-# START_FILE Dockerfile #-}
+ARG OUTPUT_DIR=/root/output
+ARG EXECUTABLE_NAME=bootstrap
+
+FROM lambci/lambda:build-provided as build
+
+COPY . .
+
+SHELL ["/bin/bash", "--rcfile", "~/.profile", "-c"]
+
+USER root
+
+# Installing Haskell Stack
+RUN curl -sSL https://get.haskellstack.org/ | sh
+
+# Build the lambda
+COPY . /root/lambda-function/
+
+RUN pwd
+
+RUN cd /root/lambda-function
+WORKDIR /root/lambda-function/
+
+RUN ls
+
+RUN stack clean --full
+RUN stack build
+
+ARG OUTPUT_DIR
+
+RUN mkdir -p ${OUTPUT_DIR} && \
+    mkdir -p ${OUTPUT_DIR}/lib
+
+ARG EXECUTABLE_NAME
+
+RUN cp $(stack path --local-install-root)/bin/${EXECUTABLE_NAME} ${OUTPUT_DIR}/${EXECUTABLE_NAME}
+
+ENTRYPOINT sh
+
+FROM public.ecr.aws/lambda/provided:al2 as deploy
+
+ARG EXECUTABLE_NAME
+
+WORKDIR ${LAMBDA_RUNTIME_DIR}
+
+ARG OUTPUT_DIR
+
+COPY --from=build ${OUTPUT_DIR} .
+
+RUN ls
+RUN mv ${EXECUTABLE_NAME} bootstrap || true
+RUN ls
+
+CMD [ "handler" ]
+
+{-# START_FILE stack.yaml #-}
+resolver: lts-18.24
+
+packages:
+- .
+
+extra-deps:
+- aws-lambda-haskell-runtime-4.1.1
+- safe-exceptions-checked-0.1.0
 
 {-# START_FILE app/Main.hs #-}
 module Main where
 
-import Lib
+import Aws.Lambda
+import qualified Lib
 
 main :: IO ()
-main = someFunc
-
+main =
+  runLambdaHaskellRuntime
+    defaultDispatcherOptions
+    (pure ())
+    id
+    (addStandaloneLambdaHandler "handler" Lib.handler)
 {-# START_FILE README.md #-}
 # {{name}}
 
 {-# START_FILE LICENSE #-}
-Copyright {{author-name}}{{^author-name}}Author name here{{/author-name}} (c) {{year}}{{^year}}2019{{/year}}
+Copyright {{author-name}}{{^author-name}}Author name here{{/author-name}} (c) {{year}}{{^year}}2018{{/year}}
 
 All rights reserved.
 
@@ -141,7 +196,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 {-# START_FILE .gitignore #-}
 .stack-work/
+build/
 *~
-dist-newstyle/
 .DS_Store
 TAGS
