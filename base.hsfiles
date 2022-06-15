@@ -7,6 +7,9 @@ author:              "{{author-name}}{{^author-name}}Author name here{{/author-n
 maintainer:          "{{author-email}}{{^author-email}}example@example.com{{/author-email}}"
 copyright:           "{{copyright}}{{^copyright}}{{year}}{{^year}}2022{{/year}} {{author-name}}{{^author-name}}Author name here{{/author-name}}{{/copyright}}"
 
+system-ghc: true
+resolver: lts-18.28
+
 extra-source-files:
 - README.md
 
