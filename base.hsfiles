@@ -7,12 +7,8 @@ author:              "{{author-name}}{{^author-name}}Author name here{{/author-n
 maintainer:          "{{author-email}}{{^author-email}}example@example.com{{/author-email}}"
 copyright:           "{{copyright}}{{^copyright}}{{year}}{{^year}}2022{{/year}} {{author-name}}{{^author-name}}Author name here{{/author-name}}{{/copyright}}"
 
-system-ghc: true
-resolver: lts-18.28
-
 extra-source-files:
 - README.md
-
 
 # Metadata used when publishing your package
 # synopsis:            Short description of your package
@@ -25,9 +21,10 @@ description:         Please see the README on GitHub at <https://github.com/{{gi
 
 dependencies:
   - base >= 4.7 && < 5
-  - text
+  - rio
 
 default-extensions:
+  - NoImplicitPrelude
   - EmptyCase
   - InstanceSigs
   - MultiParamTypeClasses
@@ -48,6 +45,7 @@ default-extensions:
   - KindSignatures
   - TypeOperators
   - ApplicativeDo
+  - ScopedTypeVariables
 
 
 library:
@@ -76,12 +74,16 @@ tests:
     - {{name}}
     - doctest
 
+{-# START_FILE hie.yaml #-}
+cradle: { stack: {}}
+
 {-# START_FILE Setup.hs #-}
 import Distribution.Simple
 main = defaultMain
 
 {-# START_FILE test/Spec.hs #-}
 import           Test.DocTest
+import           RIO
 
 main :: IO ()
 main =
