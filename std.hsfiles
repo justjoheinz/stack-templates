@@ -61,7 +61,7 @@ default-extensions:
   - NamedFieldPuns
   - NoFieldSelectors # not until GHC 9.2.1
   - NoMonomorphismRestriction
-  - NoImplicitPrelude
+  # - NoImplicitPrelude
   - OverloadedLabels
   - OverloadedStrings
   - PatternGuards
@@ -73,7 +73,6 @@ default-extensions:
   - RecursiveDo
   - RankNTypes
   - RecordWildCards
-  - RecordDotSyntax # not until GHC 9.2.1
   - ScopedTypeVariables
   - StandaloneDeriving
   - TypeFamilies
