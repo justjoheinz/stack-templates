@@ -6,6 +6,7 @@ license:             BSD3
 author:              "{{author-name}}{{^author-name}}Author name here{{/author-name}}"
 maintainer:          "{{author-email}}{{^author-email}}example@example.com{{/author-email}}"
 copyright:           "{{copyright}}{{^copyright}}{{year}}{{^year}}2022{{/year}} {{author-name}}{{^author-name}}Author name here{{/author-name}}{{/copyright}}"
+language:            GHC2021
 
 extra-source-files:
 - README.md
@@ -27,60 +28,29 @@ default-extensions:
   - AllowAmbiguousTypes
   - ApplicativeDo
   - BlockArguments
-  - ConstraintKinds
   - DeriveAnyClass
-  - DeriveDataTypeable
-  - DeriveGeneric
-  - DeriveFunctor
-  - DeriveFoldable
-  - DeriveTraversable
-  - DeriveLift
   - DerivingStrategies
   - DerivingVia
   - DefaultSignatures
   - DisambiguateRecordFields
   - DuplicateRecordFields
   - DataKinds
-  - DoAndIfThenElse
-  - EmptyDataDecls
-  - EmptyDataDeriving
-  - FlexibleContexts
   - FunctionalDependencies
-  - FlexibleInstances
   - GADTs
-  - GeneralizedNewtypeDeriving
-  - InstanceSigs
-  - ImportQualifiedPost
   - ImpredicativeTypes # not until GHC 9.2.1
-  - KindSignatures
   - LambdaCase
   - LiberalTypeSynonyms
   - MultiWayIf
-  - MultiParamTypeClasses
-  - NumericUnderscores
-  - NamedFieldPuns
-  - NoFieldSelectors # not until GHC 9.2.1
-  - NoMonomorphismRestriction
-  # - NoImplicitPrelude
   - OverloadedLabels
   - OverloadedStrings
-  - PatternGuards
   - PatternSynonyms
   - PartialTypeSignatures
-  - PolyKinds
   - PackageImports
   - QuantifiedConstraints
   - RecursiveDo
-  - RankNTypes
   - RecordWildCards
-  - ScopedTypeVariables
-  - StandaloneDeriving
   - TypeFamilies
-  - StandaloneKindSignatures
-  - TupleSections
-  - TypeApplications
   - TypeFamilyDependencies
-  - TypeOperators
   - UndecidableInstances
   - ViewPatterns
 
@@ -178,6 +148,18 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+{-# START_FILE stack-9.8.4.yaml #-}
+resolver: lts-23.28  # GHC 9.8.4
+
+packages:
+- .
+
+{-# START_FILE stack-9.6.7.yaml #-}
+resolver: lts-22.44  # GHC 9.6.7
+
+packages:
+- .
 
 {-# START_FILE .gitignore #-}
 .stack-work/
